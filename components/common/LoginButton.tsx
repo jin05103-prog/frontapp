@@ -16,7 +16,7 @@ export default function LoginButton({
         <Link
             href={href}
             className={cn(
-                "inline-flex min-h-8.5 w-27.5 shrink-0 items-center justify-center rounded-full bg-primary px-5 py-1.5 text-base leading-[22px] font-semibold text-white no-underline transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:transition-none",
+                "inline-flex min-h-8.5 w-27.5 shrink-0 items-center justify-center rounded-full bg-primary px-5 py-1.5 text-base leading-5.5 font-semibold text-white no-underline transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:transition-none",
                 className,
             )}
             {...props}>
