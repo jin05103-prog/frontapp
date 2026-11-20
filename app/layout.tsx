@@ -2,12 +2,10 @@ import { Metadata } from "next";
 import "./globals.css";
 import "@/styles/tailwind/tailwind.theme.css"
 
-import { pretendard } from "@/styles/font/font";
-import { Geist } from "next/font/google";
+import { pretendard, nanumSquareRound } from "@/styles/font/font";
 import { cn } from "@/lib/utils";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Next Project",
@@ -16,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={cn(pretendard.variable, "font-sans", geist.variable)}>
-      <body className="font-pretendard">
+    <html lang="en" className={cn(pretendard.variable, nanumSquareRound.variable, "font-sans")}>
+      <body className="min-w-330 font-pretendard">
         <ReactQueryProvider>
           {children}
         </ReactQueryProvider>
