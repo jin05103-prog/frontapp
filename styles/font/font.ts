@@ -40,7 +40,34 @@ const pretendard = localFont({
         },
     ],
     display: "swap",
-    variable: "--font-pretendard"
+    variable: "--font-pretendard-local"
 })
 
-export { pretendard }
+const nanumSquareRound = localFont({
+    src: [
+        {
+            path: "../../public/assets/fonts/nanum-square-round/NanumSquareRoundL.ttf",
+            weight: "300",
+            style: "normal",
+        },
+        {
+            path: "../../public/assets/fonts/nanum-square-round/NanumSquareRoundR.ttf",
+            weight: "400",
+            style: "normal",
+        },
+        {
+            path: "../../public/assets/fonts/nanum-square-round/NanumSquareRoundB.ttf",
+            weight: "700",
+            style: "normal",
+        },
+        {
+            path: "../../public/assets/fonts/nanum-square-round/NanumSquareRoundEB.ttf",
+            weight: "800",
+            style: "normal",
+        },
+    ],
+    display: "swap",
+    variable: "--font-nanum-square-round-local",
+})
+
+export { pretendard, nanumSquareRound }
