@@ -1,11 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import LoginButton from "@/components/common/LoginButton";
 import { user_header_navigation } from "@/types/navigation/navigation.type";
 
 export default function UserHeader() {
+    const pathname = usePathname();
+    const hideHeader = pathname === "/login" || pathname === "/onboarding";
+
+    if (hideHeader) return null;
+
     return (
-        <header className="relative z-10 min-w-330 bg-white shadow-[0_4px_18px_rgb(0_0_0/0.08)] font-pretendard">
+        <header className="sticky top-0 z-50 min-w-330 bg-white shadow-[0_4px_18px_rgb(0_0_0/0.08)] font-pretendard">
             <div className="mx-auto grid min-h-20 w-330 min-w-330 grid-cols-[280px_minmax(0,1fr)_110px] items-center gap-x-6">
                 <Link
                     href="/"
@@ -23,8 +31,8 @@ export default function UserHeader() {
                 </Link>
                 <nav className="min-w-0" aria-label="주요 메뉴">
                     <ul className="m-0 flex w-max list-none items-center gap-10 p-0">
-                        {user_header_navigation.map(({ label, href }) => (
-                            <li key={href}>
+                        {user_header_navigation.map(({ id, label, href }) => (
+                            <li key={id}>
                                 <Link
                                     href={href}
                                     className="inline-flex min-h-11 items-center rounded-sm text-base leading-6 font-medium whitespace-nowrap text-nav no-underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
