@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={cn(pretendard.variable, nanumSquareRound.variable, "font-sans")}>
+    <html lang="en" className={cn(pretendard.variable, nanumSquareRound.variable, "font-sans [scrollbar-gutter:stable_both-edges]")}>
       <body className="min-w-330 font-pretendard">
         <ReactQueryProvider>
           {children}
