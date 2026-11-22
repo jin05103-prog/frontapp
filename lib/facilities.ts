@@ -1,4 +1,8 @@
-import type { HospitalVO, MapBounds, MapFacility } from "@/types/facilities/facilities.type";
+import type {
+  HospitalVO,
+  MapBounds,
+  MapFacility,
+} from "@/types/facilities/facilities.type";
 
 // 현재 위치를 확인하지 못했을 때 사용할 기본 중심 좌표입니다.
 export const GANGNAM_STATION = { latitude: 37.49795, longitude: 127.02762 };
@@ -18,14 +22,18 @@ export function toMapFacility(hospital: HospitalVO): MapFacility {
 }
 
 // 지도 이동 때마다 새 API를 추정해 호출하지 않고, 받은 목록에서 현재 영역의 기관을 찾습니다.
-export function getVisibleFacilities(hospitals: HospitalVO[], bounds: MapBounds): MapFacility[] {
+export function getVisibleFacilities(
+  hospitals: HospitalVO[],
+  bounds: MapBounds,
+): MapFacility[] {
   return hospitals
-    .filter((hospital) => (
-      hospital.hospital_latitude >= bounds.south &&
-      hospital.hospital_latitude <= bounds.north &&
-      hospital.hospital_longitude >= bounds.west &&
-      hospital.hospital_longitude <= bounds.east
-    ))
+    .filter(
+      (hospital) =>
+        hospital.hospital_latitude >= bounds.south &&
+        hospital.hospital_latitude <= bounds.north &&
+        hospital.hospital_longitude >= bounds.west &&
+        hospital.hospital_longitude <= bounds.east,
+    )
     .map(toMapFacility);
 }
 
