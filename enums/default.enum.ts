@@ -1,3 +1,3 @@
-enum Default {
-    DEFAULT = "DEFAULT"
+export enum Default {
+  DEFAULT = "DEFAULT",
 }
