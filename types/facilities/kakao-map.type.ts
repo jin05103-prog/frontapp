@@ -25,6 +25,8 @@ export interface KakaoMap {
 export interface KakaoOverlay {
   // 지도 객체를 넣으면 표시하고 null을 넣으면 지도에서 제거합니다.
   setMap(map: KakaoMap | null): void;
+  // 기존 마커를 재생성하지 않고 변경된 좌표를 반영합니다.
+  setPosition(position: KakaoLatLng): void;
   // 마커가 겹칠 때 앞뒤 순서를 지정합니다. 선택한 마커를 앞으로 올릴 때 사용합니다.
   setZIndex(index: number): void;
 }
@@ -36,7 +38,10 @@ export interface KakaoMaps {
   // new maps.LatLng(위도, 경도)로 좌표 객체를 생성할 수 있다는 선언입니다.
   LatLng: new (latitude: number, longitude: number) => KakaoLatLng;
   // 지도용 DOM 요소, 중심 좌표, 확대 레벨을 전달해 지도 객체를 생성합니다.
-  Map: new (container: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMap;
+  Map: new (
+    container: HTMLElement,
+    options: { center: KakaoLatLng; level: number },
+  ) => KakaoMap;
   // 아래 옵션으로 직접 만든 마커 오버레이를 생성할 수 있다는 선언입니다.
   CustomOverlay: new (options: {
     // 마커를 놓을 지도상의 좌표입니다.
@@ -45,11 +50,11 @@ export interface KakaoMaps {
     content: HTMLElement;
     // 마커 가로 방향 기준점입니다. 0.5면 가로 중앙을 좌표에 맞춥니다.
     xAnchor: number;
-    // 마커 세로 방향 기준점입니다. 1이면 마커 아래쪽을 좌표에 맞춥니다.
+    // 핀 마커의 세로 기준점입니다. 1이면 아래 꼭짓점을 좌표에 맞춥니다.
     yAnchor: number;
     // 오버레이 클릭을 지도 클릭과 구분해 처리할지 지정하는 옵션입니다.
     clickable: boolean;
-  // 위 옵션으로 생성된 결과가 KakaoOverlay 타입임을 나타냅니다.
+    // 위 옵션으로 생성된 결과가 KakaoOverlay 타입임을 나타냅니다.
   }) => KakaoOverlay;
   // 카카오 기본 확대·축소 컨트롤을 만드는 생성자입니다.
   ZoomControl: new () => object;
