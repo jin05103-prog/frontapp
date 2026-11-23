@@ -2,16 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import LoginButton from "@/components/common/LoginButton";
 import { user_header_navigation } from "@/types/navigation/navigation.type";
 
 export default function UserHeader() {
-    const pathname = usePathname();
-    const hideHeader = pathname === "/login" || pathname === "/onboarding";
-
-    if (hideHeader) return null;
-
     return (
         <header className="sticky top-0 z-50 min-w-330 bg-white shadow-[0_4px_18px_rgb(0_0_0/0.08)] font-pretendard">
             <div className="mx-auto grid min-h-20 w-330 min-w-330 grid-cols-[280px_minmax(0,1fr)_110px] items-center gap-x-6">
