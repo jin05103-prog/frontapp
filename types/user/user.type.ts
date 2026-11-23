@@ -25,6 +25,9 @@ export interface JoinAdditionalRequestDTO {
   userType: string;
   userProvider: string;
   userProviderId: string;
+  // 필수 약관 동의 체크박스
+  agreeTerms: boolean;
+  agreeHealthData: boolean;
 }
 
 // 기존 프로필 업로드 함수의 프론트 입력값입니다. File은 FormData로 보냅니다.

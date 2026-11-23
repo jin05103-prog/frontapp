@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import KeepLoginToggle from "./_components/KeepLoginToggle";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -31,10 +30,6 @@ export default function Page() {
                     <br />
                     함께한 하루를 차곡차곡 담아보세요.
                 </p>
-
-                <div className="mt-3 self-end">
-                    <KeepLoginToggle />
-                </div>
 
                 <div className="mt-11 flex w-full flex-col gap-5.75">
                     <Link

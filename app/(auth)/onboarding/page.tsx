@@ -1,11 +1,11 @@
 export const instant = false
 
-import JoinAdditional from "./_component/JoinAdditional";
+import JoinContainer from "./_components/JoinContainer";
 
 export default function page() {
     return (
         <>
-            <JoinAdditional />
+            <JoinContainer />
         </>
     );
 }
