@@ -1,34 +1,23 @@
-import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-// SSR
-// cookie 접근이 가능
-// CSR
-// cookie HttpOnly 옵션인 상태에서 접근이 불가능
 export function middleware(request: NextRequest) {
-    const refreshToken = request.cookies.get("refresh_token")
+    const hasRefreshToken = Boolean(request.cookies.get("refresh_token")?.value);
     const { pathname } = request.nextUrl;
+    const requiresLogin = pathname === "/my" || pathname.startsWith("/my/")
+        || pathname === "/pregnancies" || pathname.startsWith("/pregnancies/")
+        || pathname === "/community/new";
 
-    // [로그인 전용 경로 차단]
-    if(!refreshToken && (
-        pathname.startsWith("/my-page")
-        )
-    ){
-        return NextResponse.redirect(new URL("/login", request.url))
+    // 화면 이동만 제어합니다. 실제 토큰 유효성·데이터 접근 권한은 백엔드에서 검사해야 합니다.
+    if (!hasRefreshToken && requiresLogin) {
+        return NextResponse.redirect(new URL("/login", request.url));
     }
-
-    // [비로그인 전용 경로 차단]
-    if(refreshToken && (
-        pathname.startsWith("/login") || 
-        pathname.startsWith("/join")
-    )){
-        return NextResponse.redirect(new URL("/", request.url)) 
+    if (hasRefreshToken && pathname === "/login") {
+        return NextResponse.redirect(new URL("/", request.url));
     }
-
-    return NextResponse.next()
+    return NextResponse.next();
 }
 
-// 미들웨어 라우트 추가
+// (protected)는 URL에 포함되지 않으므로 실제 페이지 주소를 지정합니다.
 export const config = {
-    matcher: ["/login", "/join", "/my-page/:path*"]
-}
+    matcher: ["/login", "/my/:path*", "/pregnancies/:path*", "/community/new"],
+};
