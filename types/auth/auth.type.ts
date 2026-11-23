@@ -8,9 +8,11 @@ export interface LoginRequestDTO {
   user_provider?: UserProvider | null;
 }
 
-// 소셜 인증 후 추가 정보를 제출하는 현재 백엔드 요청 형식입니다.
+// 소셜 인증 후 추가 정보를 제출하는 백엔드 요청 형식입니다. (POST /auth/social/join)
+// 이메일과 제공자는 보내지 않습니다. 백엔드가 pending_token으로 콜백 정보를 찾습니다.
 export interface SocialJoinRequestDTO {
   pending_token: string;
+  user_name: string;
   user_nickname: string;
   user_phone: string;
   user_type: UserType;
