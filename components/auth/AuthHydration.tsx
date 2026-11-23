@@ -1,12 +1,12 @@
 "use client";
 
 import useAuthStore from "@/stores/useAuthStore";
-import type { MemberDTO } from "@/types/member/member.type";
+import type { UserDTO } from "@/types/user/user.type";
 import type { ApiResponseDTO } from "@/types/common/common.type";
 import { useEffect } from "react";
 
 export default function AuthHydration() {
-  const { setIsAuthenticated, setMember } = useAuthStore();
+  const { setIsAuthenticated, setUser } = useAuthStore();
 
   useEffect(() => {
     const checkAuthApi = async () => {
@@ -24,8 +24,8 @@ export default function AuthHydration() {
 
         if (response.ok) {
           // accessToken이 유효하다면
-          const result: ApiResponseDTO<MemberDTO> = await response.json();
-          setMember(result.data);
+          const result: ApiResponseDTO<UserDTO> = await response.json();
+          setUser(result.data);
           setIsAuthenticated(result.success && result.data !== null);
           return;
         }
@@ -51,9 +51,9 @@ export default function AuthHydration() {
             );
 
             if (retryReponse.ok) {
-              const retryResult: ApiResponseDTO<MemberDTO> =
+              const retryResult: ApiResponseDTO<UserDTO> =
                 await retryReponse.json();
-              setMember(retryResult.data);
+              setUser(retryResult.data);
               setIsAuthenticated(
                 retryResult.success && retryResult.data !== null,
               );
@@ -63,16 +63,16 @@ export default function AuthHydration() {
         }
 
         // 2-2. 만약 refreshToken도 만료되었다면 로그아웃 처리
-        setMember(null);
+        setUser(null);
         setIsAuthenticated(false);
       } catch {
-        setMember(null);
+        setUser(null);
         setIsAuthenticated(false);
       }
     };
 
     checkAuthApi();
-  }, [setIsAuthenticated, setMember]);
+  }, [setIsAuthenticated, setUser]);
 
   return null;
 }
