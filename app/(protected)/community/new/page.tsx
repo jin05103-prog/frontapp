@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import CommunityWriteForm from "../_components/CommunityWriteForm";
+import CommunityWriteForm from "@/app/(public)/community/_components/CommunityWriteForm";
 
 const writeFormId = "community-write-form";
 
