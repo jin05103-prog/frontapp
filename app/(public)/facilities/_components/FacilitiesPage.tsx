@@ -12,6 +12,7 @@ import {
   GANGNAM_STATION,
   getDevicePosition,
   getVisibleFacilities,
+  toMapFacility,
 } from "@/lib/facilities";
 import type {
   MapBounds,
@@ -79,8 +80,13 @@ export default function FacilitiesPage() {
       bounds ? getVisibleFacilities(hospitals.data?.items ?? [], bounds) : [],
     [hospitals.data, bounds],
   );
+  // 핀 표시는 지도 범위로 제한하되, 선택한 기관의 정보는 전체 조회 목록에서 유지합니다.
+  const allFacilities = useMemo(
+    () => (hospitals.data?.items ?? []).map(toMapFacility),
+    [hospitals.data],
+  );
   const selected =
-    facilities.find((facility) => facility.key === selectedKey) ?? null;
+    allFacilities.find((facility) => facility.key === selectedKey) ?? null;
 
   async function locate() {
     setLocationState("pending");
@@ -109,17 +115,7 @@ export default function FacilitiesPage() {
         <ChevronRight size={14} aria-hidden="true" />
         <span aria-current="page">인근 의료기관</span>
       </nav>
-      <div className="mb-6 mt-8 flex items-end justify-between gap-6">
-        <div>
-          <h1 className="text-[1.75rem] font-bold tracking-tight text-[#263D32]">
-            인근 의료기관
-          </h1>
-          <p className="mt-2 text-sm text-[#7C8B84]">
-            주변 분만 가능 의료기관의 위치와 정보를 확인하세요.
-          </p>
-        </div>
-      </div>
-      <div className="mb-5 flex items-center justify-between rounded-2xl bg-[#FFF3F0] px-6 py-4 text-sm">
+      <div className="mb-5 mt-8 flex items-center justify-between rounded-2xl bg-[#FFF3F0] px-6 py-4 text-sm">
         <p className="flex items-center gap-3 font-semibold text-[#BA4438]">
           <Phone size={17} aria-hidden="true" />
           응급 상황에는 119에 연락하세요.
@@ -161,11 +157,6 @@ export default function FacilitiesPage() {
                 {hospitals.data
                   ? "정보 갱신에 실패해 이전 정보를 표시합니다."
                   : "의료기관 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."}
-              </p>
-            )}
-            {hospitals.isSuccess && bounds && facilities.length === 0 && (
-              <p>
-                주변에 등록된 의료기관이 없습니다. 지도를 이동해 확인해 주세요.
               </p>
             )}
           </>
