@@ -69,7 +69,6 @@ export default function JoinContainer() {
             user_name: joinDto.userName,
             user_nickname: joinDto.userNickname,
             user_phone: joinDto.userPhone,
-            user_type: UserType.GENERAL,
             // 필수 약관 동의 여부 (동의 일시/버전은 백엔드가 기록)
             agree_terms: joinDto.agreeTerms,
             agree_health_data: joinDto.agreeHealthData,
