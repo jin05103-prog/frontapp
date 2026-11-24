@@ -15,7 +15,6 @@ export interface SocialJoinRequestDTO {
   user_name: string;
   user_nickname: string;
   user_phone: string;
-  user_type: UserType;
   // 필수 약관 동의 (둘 다 true여야 가입 가능)
   agree_terms: boolean;
   agree_health_data: boolean;
