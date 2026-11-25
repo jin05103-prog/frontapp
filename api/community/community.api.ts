@@ -1,4 +1,37 @@
-import type { CommunityPost, CommunityPostDetail, CommunityPostPayload } from "@/types/community/community.type";
+import { findMockPostById } from "@/app/(public)/community/_mock/posts";
+import { formatRelativeTime } from "@/lib/format";
+import type { CommunityCategory, CommunityPost, CommunityPostDetail, CommunityPostPayload } from "@/types/community/community.type";
+import type { FeedPost } from "@/types/community/communityFeed.type";
+
+const feedCategoryLabels: Record<FeedPost["category"], CommunityCategory> = {
+    pregnancy: "임신 이야기",
+    parenting: "육아 이야기",
+    neighborhood: "우리 동네",
+    health: "건강·병원",
+    living: "살림·추천",
+};
+
+// 피드 목록(FeedPost)의 글을 상세 화면 형식으로 바꿉니다. 본문과 댓글은 아직 API가 없어 비워 둡니다.
+const toPostDetail = (post: FeedPost): CommunityPostDetail => {
+    const category = feedCategoryLabels[post.category];
+
+    return {
+        id: String(post.id),
+        badge: post.authorTag === "예비맘" ? "예비맘" : "아이맘",
+        category,
+        title: post.title,
+        body: post.title,
+        tags: [`#${category}`],
+        author: { name: post.authorName, avatar: post.authorName.slice(0, 1) },
+        publishedAt: post.createdAt,
+        postedAgo: formatRelativeTime(post.createdAt),
+        likes: post.likeCount,
+        comments: post.commentCount,
+        isFollowing: false,
+        contents: [post.title],
+        commentList: [],
+    };
+};
 
 const communityPostsMock: CommunityPost[] = [
     {
@@ -67,7 +100,11 @@ export const getCommunityPosts = async (): Promise<CommunityPost[]> => {
 // 상세 화면용 목업입니다. 본문 문단과 댓글은 첫 번째 게시글만 준비되어 있습니다.
 export const getCommunityPost = async (postId: string): Promise<CommunityPostDetail | null> => {
     const post = communityPostsMock.find((item) => item.id === postId);
-    if (!post) return null;
+    if (!post) {
+        // 피드 목록(communityFeed.api)의 글은 숫자 id 를 쓰므로 여기서도 찾아 봅니다.
+        const feedPost = findMockPostById(Number(postId));
+        return feedPost ? toPostDetail(feedPost) : null;
+    }
 
     return {
         ...post,

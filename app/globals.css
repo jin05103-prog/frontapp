@@ -145,4 +145,50 @@ button {
     --color-nav: var(--nav-foreground);
     --color-sub-1: var(--brand-sub-1);
     --color-sub-2: var(--brand-sub-2);
+
+    /* 커뮤니티 피드 화면 토큰 (docs/screens/community.md 5번) */
+    --color-brand: var(--primary);
+    --color-brand-hover: #00C6A5;
+    --color-brand-dark: #009A80;
+    --color-brand-text: #00A98D;
+    --color-brand-subtle: #E8F8F4;
+    --color-surface: #FFFFFF;
+    --color-ink: #27313A;
+    --color-mute: #7F8A90;
+    --color-mute-light: #9AA4AA;
+    --color-line: #ECEEF3;
+    --color-surface-alt: #F7F8FA;
+    --color-placeholder: #EEF1F3;
+    --color-tag-mom-text: var(--color-brand-text);
+    --color-tag-mom-bg: var(--color-brand-subtle);
+    --color-tag-parent-text: #8E6FB8;
+    --color-tag-parent-bg: #F2ECFA;
+    --color-promo-bg: #EBE7FF;
+    --color-promo-title: #2E2640;
+    --color-promo-body: #6B6385;
+    --color-promo-link: #6B4E9B;
+    --color-quote-bg: #FFF7C9;
+    --color-sale: #E0808F;
+
+    /* 카테고리 식별 색 */
+    --color-cat-all: #00A98D;
+    --color-cat-pregnancy: #5BA9D6;
+    --color-cat-parenting: #8E6FB8;
+    --color-cat-neighborhood: #E8A05C;
+    --color-cat-health: #E0808F;
+    --color-cat-living: #6BBF93;
+
+    /* 커뮤니티 피드 라디우스 */
+    --radius-feed-sm: 5px;
+    --radius-feed-md: 8px;
+    --radius-feed-lg: 14px;
+
+    /* 타이포: 가이드에 없지만 화면에서 쓰이는 두 단계 (Caption 12 / Micro 10) */
+    --text-caption: 12px;
+    --text-caption--line-height: 1.5;
+    --text-micro: 10px;
+    --text-micro--line-height: 1.4;
+
+    /* 그리드: Desktop N (1920 프레임, 12컬럼, margin 300, gutter 24, content 1320) */
+    --container-desktop-n: 1320px;
 }
