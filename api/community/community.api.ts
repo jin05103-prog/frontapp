@@ -1,5 +1,6 @@
 import { findMockPostById } from "@/app/(public)/community/_mock/posts";
 import { formatRelativeTime } from "@/lib/format";
+import { addLocalPost } from "@/lib/communityLocalStore";
 import type { CommunityCategory, CommunityPost, CommunityPostDetail, CommunityPostPayload } from "@/types/community/community.type";
 import type { FeedPost } from "@/types/community/communityFeed.type";
 
@@ -11,8 +12,16 @@ const feedCategoryLabels: Record<FeedPost["category"], CommunityCategory> = {
     living: "살림·추천",
 };
 
-// 피드 목록(FeedPost)의 글을 상세 화면 형식으로 바꿉니다. 본문과 댓글은 아직 API가 없어 비워 둡니다.
-const toPostDetail = (post: FeedPost): CommunityPostDetail => {
+const feedCategoryIds: Record<CommunityCategory, FeedPost["category"]> = {
+    "임신 이야기": "pregnancy",
+    "육아 이야기": "parenting",
+    "우리 동네": "neighborhood",
+    "건강·병원": "health",
+    "살림·추천": "living",
+};
+
+// 피드 목록(FeedPost)의 글을 상세 화면 형식으로 바꿉니다. 본문을 따로 받지 못하면 제목을 본문으로 쓰고, 댓글은 비워 둡니다.
+export const toPostDetail = (post: FeedPost, contents: string[] = [post.title]): CommunityPostDetail => {
     const category = feedCategoryLabels[post.category];
 
     return {
@@ -27,8 +36,9 @@ const toPostDetail = (post: FeedPost): CommunityPostDetail => {
         postedAgo: formatRelativeTime(post.createdAt),
         likes: post.likeCount,
         comments: post.commentCount,
+        views: post.viewCount,
         isFollowing: false,
-        contents: [post.title],
+        contents,
         commentList: [],
     };
 };
@@ -46,6 +56,7 @@ const communityPostsMock: CommunityPost[] = [
         postedAgo: "35분 전",
         likes: 42,
         comments: 13,
+        views: 318,
         isFollowing: true,
     },
     {
@@ -60,6 +71,7 @@ const communityPostsMock: CommunityPost[] = [
         postedAgo: "12분 전",
         likes: 28,
         comments: 6,
+        views: 154,
         isFollowing: true,
     },
     {
@@ -74,6 +86,7 @@ const communityPostsMock: CommunityPost[] = [
         postedAgo: "1시간 전",
         likes: 19,
         comments: 8,
+        views: 97,
         isFollowing: false,
     },
     {
@@ -88,6 +101,7 @@ const communityPostsMock: CommunityPost[] = [
         postedAgo: "3시간 전",
         likes: 15,
         comments: 4,
+        views: 63,
         isFollowing: true,
     },
 ];
@@ -123,7 +137,22 @@ export const getCommunityPost = async (postId: string): Promise<CommunityPostDet
     };
 };
 
-// TODO: 백엔드 게시글 등록 API가 준비되면 POST 요청으로 교체합니다. 현재는 저장하지 않습니다.
-export const createCommunityPost = async (payload: CommunityPostPayload): Promise<void> => {
-    void payload;
+// 백엔드 게시글 등록 API가 준비되면 POST 요청으로 교체합니다. 현재는 이 브라우저에 저장합니다.
+// 새 글은 조회수·좋아요·댓글 수 0으로 시작합니다.
+export const createCommunityPost = async (payload: CommunityPostPayload, authorName: string): Promise<void> => {
+    const category = feedCategoryIds[payload.category];
+
+    addLocalPost({
+        id: Date.now(),
+        category,
+        authorTag: category === "parenting" ? "육아맘" : "예비맘",
+        title: payload.title,
+        authorName,
+        thumbnailUrl: null,
+        likeCount: 0,
+        commentCount: 0,
+        viewCount: 0,
+        createdAt: new Date().toISOString(),
+        content: payload.content,
+    });
 };

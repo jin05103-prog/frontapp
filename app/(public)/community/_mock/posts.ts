@@ -62,11 +62,11 @@ export const MOCK_ERROR_KEYWORD = "오류테스트";
 export const findMockPostById = (id: number): FeedPost | null => posts.find((post) => post.id === id) ?? null;
 
 // 백엔드가 준비되기 전까지 페이징·정렬·검색을 클라이언트에서 흉내 냅니다.
-export const queryMockPosts = ({ category, sort, q, page, size }: FeedPostListParams): FeedPostListResponse => {
+export const queryMockPosts = ({ category, sort, q, page, size }: FeedPostListParams, extraPosts: FeedPost[] = []): FeedPostListResponse => {
     if (q === MOCK_ERROR_KEYWORD) throw new Error("mock posts error");
 
     const keyword = q.trim().toLocaleLowerCase();
-    const filtered = posts
+    const filtered = [...extraPosts, ...posts]
         .filter((post) => (category === "all" || post.category === category) && post.title.toLocaleLowerCase().includes(keyword))
         .sort((a, b) => (sort === "latest" ? Date.parse(b.createdAt) - Date.parse(a.createdAt) : b.viewCount - a.viewCount));
 

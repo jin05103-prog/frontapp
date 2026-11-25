@@ -2,7 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { createCommunityPost } from "@/api/community/community.api";
+import useAuthStore from "@/stores/useAuthStore";
 import type { CommunityCategory, CommunityPrefix } from "@/types/community/community.type";
 
 interface CommunityWriteFormProps {
@@ -26,6 +28,8 @@ const toolbarItems = [
 
 export default function CommunityWriteForm({ formId }: CommunityWriteFormProps) {
     const router = useRouter();
+    const queryClient = useQueryClient();
+    const user = useAuthStore((state) => state.user);
     const [isPublic, setIsPublic] = useState(true);
     const [category, setCategory] = useState<CommunityCategory>("임신 이야기");
     const [prefix, setPrefix] = useState<CommunityPrefix | "">("");
@@ -40,13 +44,18 @@ export default function CommunityWriteForm({ formId }: CommunityWriteFormProps) 
 
         setIsSubmitting(true);
         try {
-            await createCommunityPost({
-                isPublic,
-                category,
-                prefix: prefix || null,
-                title: title.trim(),
-                content: content.trim(),
-            });
+            await createCommunityPost(
+                {
+                    isPublic,
+                    category,
+                    prefix: prefix || null,
+                    title: title.trim(),
+                    content: content.trim(),
+                },
+                user?.user_nickname ?? "익명",
+            );
+            // 피드 목록 캐시에 새 글이 보이도록 다시 불러오게 합니다.
+            await queryClient.invalidateQueries({ queryKey: ["community", "posts"] });
             router.push("/community");
         } catch {
             setIsSubmitting(false);

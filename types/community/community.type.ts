@@ -20,6 +20,7 @@ export interface CommunityPost {
     postedAgo: string;
     likes: number;
     comments: number;
+    views: number;
     isFollowing: boolean;
 }
 
