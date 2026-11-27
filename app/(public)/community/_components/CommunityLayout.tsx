@@ -8,11 +8,9 @@ import type { FeedCategoryId, FeedSort } from "@/types/community/communityFeed.t
 import {
     FEED_CATEGORIES,
     FEED_PAGE_SIZE,
-    INITIAL_VISIBLE_COUNT,
-    LOAD_MORE_COUNT,
-    LOAD_MORE_DELAY_MS,
-    SCROLL_SETTLE_MS,
+    POPULAR_REFETCH_MS,
     SEARCH_DEBOUNCE_MS,
+    getWritePostPath,
 } from "../_constants/feed";
 import useHydrated from "../_hooks/useHydrated";
 import CategoryList from "./CategoryList";
@@ -23,7 +21,7 @@ import PopularProductCard from "./PopularProductCard";
 import PostList from "./PostList";
 import PostSearchInput from "./PostSearchInput";
 import SortTabs from "./SortTabs";
-import WritePostButton, { getWritePostHref } from "./WritePostButton";
+import WritePostButton from "./WritePostButton";
 
 const DAILY_QUOTE = "완벽하지 않아도 괜찮아요.\n오늘도 충분히 잘하고 있어요. 💛";
 
@@ -35,16 +33,11 @@ export default function CommunityLayout() {
     const [category, setCategory] = useState<FeedCategoryId>("all");
     const [sort, setSort] = useState<FeedSort>("popular");
     const [page, setPage] = useState(1);
-    const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
-    const [loadingMore, setLoadingMore] = useState(false);
 
     const centerRef = useRef<HTMLElement>(null);
-    const listEndRef = useRef<HTMLDivElement>(null);
-    const ignoreScrollUntilRef = useRef(0);
 
     const hydrated = useHydrated();
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const isLoggedIn = hydrated && isAuthenticated;
 
     const posts = useQuery({
         queryKey: ["community", "posts", { category, sort, q: query, page }],
@@ -56,20 +49,14 @@ export default function CommunityLayout() {
     const products = useQuery({
         queryKey: ["community", "popular-products"],
         queryFn: getPopularProducts,
+        // 화면을 켜 둔 채 09:00 가 지나도 새 목록이 보이도록 주기적으로 다시 읽습니다.
+        refetchInterval: POPULAR_REFETCH_MS,
     });
 
+    const writeHref = getWritePostPath(category);
     const items = posts.data?.items ?? [];
     // 카테고리·정렬·페이지·검색어가 바뀌면 이전 데이터를 보여 주지 않고 스켈레톤을 보여 줍니다.
     const loading = posts.isPending || posts.isPlaceholderData;
-    const canLoadMore = !loading && !posts.isError && items.length > visibleCount;
-    const visibleItems = items.slice(0, visibleCount);
-    const loadingMoreCount = loadingMore ? Math.min(LOAD_MORE_COUNT, items.length - visibleCount) : 0;
-
-    const resetView = () => {
-        setPage(1);
-        setVisibleCount(INITIAL_VISIBLE_COUNT);
-        setLoadingMore(false);
-    };
 
     // 검색어는 입력 후 SEARCH_DEBOUNCE_MS 뒤에 반영합니다. 공백만 입력하면 요청하지 않고 직전 목록을 유지합니다.
     useEffect(() => {
@@ -78,82 +65,39 @@ export default function CommunityLayout() {
             if (searchInput !== "" && next === "") return;
             setQuery(next);
             setPage(1);
-            setVisibleCount(INITIAL_VISIBLE_COUNT);
-            setLoadingMore(false);
         }, SEARCH_DEBOUNCE_MS);
         return () => window.clearTimeout(timer);
     }, [searchInput]);
-
-    // 사용자가 아래로 스크롤해 목록 하단에 닿으면 다음 5개를 이어서 보여 줍니다. 스크롤하기 전에는 동작하지 않습니다.
-    // 페이지 이동으로 인한 스크롤 위치 보정은 무시하고, 스크롤할 공간이 없는 큰 화면을 위해 휠 입력도 함께 봅니다.
-    useEffect(() => {
-        if (!canLoadMore || loadingMore) return;
-
-        let lastScrollY = window.scrollY;
-        const requestMore = () => {
-            const end = listEndRef.current;
-            if (Date.now() < ignoreScrollUntilRef.current) return;
-            if (end && end.getBoundingClientRect().top <= window.innerHeight) setLoadingMore(true);
-        };
-        const handleScroll = () => {
-            const scrolledDown = window.scrollY > lastScrollY;
-            lastScrollY = window.scrollY;
-            if (scrolledDown) requestMore();
-        };
-        const handleWheel = (event: WheelEvent) => {
-            if (event.deltaY > 0) requestMore();
-        };
-
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        window.addEventListener("wheel", handleWheel, { passive: true });
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-            window.removeEventListener("wheel", handleWheel);
-        };
-    }, [canLoadMore, loadingMore]);
-
-    useEffect(() => {
-        if (!loadingMore) return;
-
-        const timer = window.setTimeout(() => {
-            setVisibleCount((count) => count + LOAD_MORE_COUNT);
-            setLoadingMore(false);
-        }, LOAD_MORE_DELAY_MS);
-        return () => window.clearTimeout(timer);
-    }, [loadingMore]);
 
     // 이미 선택된 카테고리를 다시 눌러도 해제되지 않고 아무 변화도 없습니다.
     const handleCategorySelect = (id: FeedCategoryId) => {
         if (id === category) return;
         setCategory(id);
-        resetView();
+        setPage(1);
     };
 
     const handleSortChange = (value: FeedSort) => {
         if (value === sort) return;
         setSort(value);
-        resetView();
+        setPage(1);
     };
 
     const handlePageChange = (nextPage: number) => {
         if (nextPage === page) return;
         setPage(nextPage);
-        setVisibleCount(INITIAL_VISIBLE_COUNT);
-        setLoadingMore(false);
-        ignoreScrollUntilRef.current = Date.now() + SCROLL_SETTLE_MS;
         centerRef.current?.scrollIntoView({ block: "start" });
     };
 
     const handleClearSearch = () => {
         setSearchInput("");
         setQuery("");
-        resetView();
+        setPage(1);
     };
 
     return (
         <div className="relative mt-[30px] pb-16">
             <div className="absolute -top-[26px] right-0">
-                <WritePostButton isLoggedIn={isLoggedIn} />
+                <WritePostButton href={writeHref} />
             </div>
 
             <div className="grid grid-cols-[294px_682px_288px] items-start gap-7">
@@ -181,17 +125,15 @@ export default function CommunityLayout() {
 
                     <div className="mt-[18px]">
                         <PostList
-                            posts={visibleItems}
+                            posts={items}
                             loading={loading}
-                            loadingMoreCount={loadingMoreCount}
                             error={posts.isError}
                             searchQuery={query}
-                            writeHref={getWritePostHref(isLoggedIn)}
+                            writeHref={writeHref}
                             onRetry={() => posts.refetch()}
                             onClearSearch={handleClearSearch}
                         />
                     </div>
-                    <div ref={listEndRef} aria-hidden="true" className="h-px" />
 
                     {!loading && !posts.isError && items.length > 0 && (
                         <div className="mt-[38px]">
