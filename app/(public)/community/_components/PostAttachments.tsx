@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
 import { fetchServerPost, voteCommunityPost } from "@/api/community/community.api";
 import type { CommunityAttachments } from "@/types/community/community.type";
+import { FOCUS_RING } from "../_constants/feed";
 import PostPlaceMap from "./PostPlaceMap";
 
 interface PostAttachmentsProps {
@@ -104,11 +105,14 @@ export default function PostAttachments({ attachments, postId }: PostAttachments
 
     return (
         <div className="mt-[22px] space-y-4">
+            {/* 사진이 한 장이면 본문 폭을 다 씁니다. 원본보다 크게 늘리면 흐려지므로 확대하지 않습니다. */}
             {photos.length > 0 && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className={`grid items-start gap-3 ${photos.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                     {photos.map((src, index) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img key={index} src={src} alt={`첨부 사진 ${index + 1}`} className="w-full rounded-feed-lg object-cover" />
+                        <a key={index} href={src} target="_blank" rel="noopener noreferrer" title="원본 크기로 보기" className={`mx-auto block max-w-full ${FOCUS_RING}`}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={src} alt={`첨부 사진 ${index + 1}`} className="max-w-full rounded-feed-lg" />
+                        </a>
                     ))}
                 </div>
             )}

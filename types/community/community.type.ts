@@ -12,6 +12,7 @@ export interface CommunityPost {
     id: string;
     badge: CommunityBadge;
     category: CommunityCategory;
+    prefix?: string; // 말머리
     title: string;
     body: string;
     tags: string[];

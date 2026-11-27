@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { ArrowUpRight, Eye, MessageCircle } from "lucide-react";
+import { Eye, MessageCircle } from "lucide-react";
 import type { CommunityPostDetail } from "@/types/community/community.type";
 import CommunityCommentSection from "./CommunityCommentSection";
 import CommunityLikeButton from "./CommunityLikeButton";
 import PostAttachments from "./PostAttachments";
 import PostCommentCount from "./PostCommentCount";
 import PostOwnerActions from "./PostOwnerActions";
-import PostTag from "./PostTag";
 import PostViewCount from "./PostViewCount";
 import RelativeTime from "./RelativeTime";
 
@@ -29,9 +28,14 @@ export default function PostDetailView({ post }: PostDetailViewProps) {
 
             <div className="mt-8 grid grid-cols-[984px_312px] items-start gap-6">
                 <article aria-labelledby="community-post-title" className="rounded-feed-lg bg-surface p-9">
-                    <div className="flex items-center gap-2">
-                        <PostTag type={post.badge === "아이맘" ? "육아맘" : "예비맘"} />
-                        <span className="text-xs text-mute-light">· <RelativeTime iso={post.publishedAt} fallback={post.postedAgo} /></span>
+                    <div className="flex items-center gap-2 text-base">
+                        {post.prefix && (
+                            <>
+                                <span className="text-mute">{post.prefix}</span>
+                                <span aria-hidden="true" className="text-mute-light">·</span>
+                            </>
+                        )}
+                        <span className="text-mute-light"><RelativeTime iso={post.publishedAt} fallback={post.postedAgo} /></span>
                     </div>
                     <h1 id="community-post-title" className="mt-3 max-w-[480px] text-[32px] leading-[1.4] font-extrabold">{post.title}</h1>
 
@@ -43,12 +47,7 @@ export default function PostDetailView({ post }: PostDetailViewProps) {
                                 <p className="mt-0.5 text-xs text-mute-light">우리의 소중한 순간 나눠요</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            {isServerPost && <PostOwnerActions key={post.id} postId={post.id} />}
-                            <span aria-hidden="true" className="flex size-[38px] items-center justify-center rounded-full bg-placeholder text-mute">
-                                <ArrowUpRight className="size-3.5" />
-                            </span>
-                        </div>
+                        {isServerPost && <PostOwnerActions key={post.id} postId={post.id} />}
                     </div>
 
                     {post.attachments ? (
