@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getSafeRedirectPath, LOGIN_REDIRECT_COOKIE } from "@/lib/loginRedirect";
 
 export function middleware(request: NextRequest) {
     const hasRefreshToken = Boolean(request.cookies.get("refresh_token")?.value);
@@ -14,16 +15,19 @@ export function middleware(request: NextRequest) {
         loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
         return NextResponse.redirect(loginUrl);
     }
-    if (hasRefreshToken && pathname === "/login") {
-        // 같은 사이트 안의 경로만 허용합니다. "//evil.com" 같은 외부 주소는 무시합니다.
-        const redirect = request.nextUrl.searchParams.get("redirect");
-        const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
-        return NextResponse.redirect(new URL(target, request.url));
+    if (hasRefreshToken && (pathname === "/login" || pathname === "/")) {
+        // 주소의 ?redirect= 가 우선이고, 소셜 로그인 후 "/"로 돌아온 경우에는 보관한 쿠키를 씁니다.
+        const queryPath = pathname === "/login" ? request.nextUrl.searchParams.get("redirect") : null;
+        const target = getSafeRedirectPath(queryPath ?? request.cookies.get(LOGIN_REDIRECT_COOKIE)?.value);
+        if (pathname === "/" && !target) return NextResponse.next();
+        const response = NextResponse.redirect(new URL(target ?? "/", request.url));
+        response.cookies.delete(LOGIN_REDIRECT_COOKIE);
+        return response;
     }
     return NextResponse.next();
 }
 
 // (protected)는 URL에 포함되지 않으므로 실제 페이지 주소를 지정합니다.
 export const config = {
-    matcher: ["/login", "/my/:path*", "/pregnancies/:path*", "/community/new", "/community/:postId/edit"],
+    matcher: ["/", "/login", "/my/:path*", "/pregnancies/:path*", "/community/new", "/community/:postId/edit"],
 };

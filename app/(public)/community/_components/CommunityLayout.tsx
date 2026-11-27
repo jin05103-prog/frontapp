@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getFeedPosts, getPopularProducts } from "@/api/community/communityFeed.api";
 import useAuthStore from "@/stores/useAuthStore";
@@ -10,6 +11,7 @@ import {
     FEED_PAGE_SIZE,
     POPULAR_REFETCH_MS,
     SEARCH_DEBOUNCE_MS,
+    getFeedPagePath,
     getWritePostPath,
 } from "../_constants/feed";
 import useHydrated from "../_hooks/useHydrated";
@@ -32,7 +34,10 @@ export default function CommunityLayout() {
     const [query, setQuery] = useState("");
     const [category, setCategory] = useState<FeedCategoryId>("all");
     const [sort, setSort] = useState<FeedSort>("popular");
-    const [page, setPage] = useState(1);
+
+    // 페이지 번호는 주소의 ?page= 값이 기준입니다. 없거나 1 이상의 정수가 아니면 1페이지입니다.
+    const pageParam = Number(useSearchParams().get("page") ?? 1);
+    const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
     const centerRef = useRef<HTMLElement>(null);
 
@@ -43,6 +48,8 @@ export default function CommunityLayout() {
         queryKey: ["community", "posts", { category, sort, q: query, page }],
         queryFn: () => getFeedPosts({ category, sort, q: query, page, size: FEED_PAGE_SIZE }),
         placeholderData: keepPreviousData,
+        // 상세에서 돌아올 때마다 조회수가 갱신되도록, 캐시가 남아 있어도 다시 읽습니다.
+        refetchOnMount: "always",
         retry: false,
     });
 
@@ -58,40 +65,54 @@ export default function CommunityLayout() {
     // 카테고리·정렬·페이지·검색어가 바뀌면 이전 데이터를 보여 주지 않고 스켈레톤을 보여 줍니다.
     const loading = posts.isPending || posts.isPlaceholderData;
 
+    // 마지막 페이지를 넘는 ?page= 로 들어오면 마지막 페이지로 주소를 바로잡습니다.
+    // 백엔드는 요청한 페이지 번호를 그대로 돌려주므로 totalPages 로 판단합니다.
+    const totalPages = loading ? undefined : posts.data?.totalPages;
+    useEffect(() => {
+        if (totalPages !== undefined && page > totalPages) {
+            window.history.replaceState(null, "", getFeedPagePath(totalPages));
+        }
+    }, [totalPages, page]);
+
+    // 검색 조건이 바뀌면 방문 기록을 늘리지 않고 1페이지로 돌아갑니다.
+    const resetPage = () => window.history.replaceState(null, "", getFeedPagePath(1));
+
     // 검색어는 입력 후 SEARCH_DEBOUNCE_MS 뒤에 반영합니다. 공백만 입력하면 요청하지 않고 직전 목록을 유지합니다.
     useEffect(() => {
         const timer = window.setTimeout(() => {
             const next = searchInput.trim();
             if (searchInput !== "" && next === "") return;
+            // 검색어가 그대로면 주소의 페이지 번호를 유지합니다. (첫 진입, 뒤로 가기)
+            if (next === query) return;
             setQuery(next);
-            setPage(1);
+            resetPage();
         }, SEARCH_DEBOUNCE_MS);
         return () => window.clearTimeout(timer);
-    }, [searchInput]);
+    }, [searchInput, query]);
 
     // 이미 선택된 카테고리를 다시 눌러도 해제되지 않고 아무 변화도 없습니다.
     const handleCategorySelect = (id: FeedCategoryId) => {
         if (id === category) return;
         setCategory(id);
-        setPage(1);
+        resetPage();
     };
 
     const handleSortChange = (value: FeedSort) => {
         if (value === sort) return;
         setSort(value);
-        setPage(1);
+        resetPage();
     };
 
     const handlePageChange = (nextPage: number) => {
         if (nextPage === page) return;
-        setPage(nextPage);
+        window.history.pushState(null, "", getFeedPagePath(nextPage));
         centerRef.current?.scrollIntoView({ block: "start" });
     };
 
     const handleClearSearch = () => {
         setSearchInput("");
         setQuery("");
-        setPage(1);
+        resetPage();
     };
 
     return (
