@@ -30,6 +30,8 @@ interface CommunityWriteFormProps {
     formId: string;
     // 있으면 이 게시글을 수정하는 폼이 됩니다.
     initialPost?: CommunityPostEditData;
+    // 새 글의 게시판 기본값입니다.
+    defaultCategory?: CommunityCategory;
 }
 
 interface PhotoItem {
@@ -57,14 +59,15 @@ const readVideoDuration = (url: string): Promise<number> =>
 const toPrefix = (category: CommunityCategory, prefix?: string): CommunityPrefix =>
     BOARD_PREFIXES[category].find((item) => item === prefix) ?? BOARD_PREFIXES[category][0];
 
-export default function CommunityWriteForm({ formId, initialPost }: CommunityWriteFormProps) {
+export default function CommunityWriteForm({ formId, initialPost, defaultCategory }: CommunityWriteFormProps) {
+    const startCategory = initialPost?.category ?? defaultCategory ?? BOARDS[0];
     const router = useRouter();
     const queryClient = useQueryClient();
     const photoInputRef = useRef<HTMLInputElement>(null);
     const videoInputRef = useRef<HTMLInputElement>(null);
     const [isPublic, setIsPublic] = useState(true);
-    const [category, setCategory] = useState<CommunityCategory>(initialPost?.category ?? "임신 이야기");
-    const [prefix, setPrefix] = useState<CommunityPrefix>(() => toPrefix(initialPost?.category ?? "임신 이야기", initialPost?.prefix));
+    const [category, setCategory] = useState<CommunityCategory>(startCategory);
+    const [prefix, setPrefix] = useState<CommunityPrefix>(() => toPrefix(startCategory, initialPost?.prefix));
     const [title, setTitle] = useState(initialPost?.title ?? "");
     const [content, setContent] = useState(initialPost?.content ?? "");
     // 수정할 때 남아 있는 기존 첨부입니다. 아래 photos·videos 는 새로 고른 파일입니다.
@@ -80,6 +83,18 @@ export default function CommunityWriteForm({ formId, initialPost }: CommunityWri
     const [pollMultiple, setPollMultiple] = useState(initialPost?.poll?.allowMultiple ?? false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const isPollLocked = !!initialPost?.poll?.locked;
+
+    // 이 페이지는 상태가 보존되므로, 새로 들어올 때(bfcacheId 변경)마다 게시판만 기본값으로 다시 맞춥니다.
+    // 작성 중인 내용은 그대로 두고, 뒤로·앞으로 가기에서는 직접 고른 게시판도 유지합니다.
+    const entry = `${router.bfcacheId}:${defaultCategory ?? ""}`;
+    const [appliedEntry, setAppliedEntry] = useState(entry);
+    if (appliedEntry !== entry) {
+        setAppliedEntry(entry);
+        if (defaultCategory) {
+            setCategory(defaultCategory);
+            setPrefix(toPrefix(defaultCategory, prefix));
+        }
+    }
     const canSubmit = title.trim().length > 0 && content.trim().length > 0 && !isSubmitting;
 
     const handlePhotos = (event: ChangeEvent<HTMLInputElement>) => {
@@ -138,6 +153,19 @@ export default function CommunityWriteForm({ formId, initialPost }: CommunityWri
         setVideos((prev) => prev.filter((_, i) => i !== index));
     };
 
+    // 장소·투표를 삭제하면 입력란을 닫고 값도 비웁니다.
+    const removePlace = () => {
+        setPlaceOpen(false);
+        setPlace(null);
+    };
+
+    const removePoll = () => {
+        setPollOpen(false);
+        setPollQuestion("");
+        setPollOptions(["", ""]);
+        setPollMultiple(false);
+    };
+
     const handleCategoryChange = (next: CommunityCategory) => {
         setCategory(next);
         // 새 게시판에 없는 말머리는 첫 번째 말머리로 바꿉니다.
@@ -149,18 +177,14 @@ export default function CommunityWriteForm({ formId, initialPost }: CommunityWri
         photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
         videos.forEach((video) => URL.revokeObjectURL(video.url));
         setIsPublic(true);
-        setCategory("임신 이야기");
-        setPrefix("질문");
+        setCategory(startCategory);
+        setPrefix(toPrefix(startCategory));
         setTitle("");
         setContent("");
         setPhotos([]);
         setVideos([]);
-        setPlaceOpen(false);
-        setPlace(null);
-        setPollOpen(false);
-        setPollQuestion("");
-        setPollOptions(["", ""]);
-        setPollMultiple(false);
+        removePlace();
+        removePoll();
         setIsSubmitting(false);
     };
 
@@ -170,11 +194,11 @@ export default function CommunityWriteForm({ formId, initialPost }: CommunityWri
 
         const filledOptions = pollOptions.map((option) => option.trim()).filter(Boolean);
         if (pollOpen && (!pollQuestion.trim() || filledOptions.length < MIN_POLL_OPTIONS)) {
-            window.alert("투표는 제목과 항목을 2개 이상 입력해 주세요. 투표를 쓰지 않으려면 투표 입력란을 닫아 주세요.");
+            window.alert("투표는 제목과 항목을 2개 이상 입력해 주세요. 투표를 쓰지 않으려면 투표를 삭제해 주세요.");
             return;
         }
         if (placeOpen && !place) {
-            window.alert("검색 결과에서 장소를 선택해 주세요. 장소를 쓰지 않으려면 장소 입력란을 닫아 주세요.");
+            window.alert("검색 결과에서 장소를 선택해 주세요. 장소를 쓰지 않으려면 장소를 삭제해 주세요.");
             return;
         }
 
@@ -363,11 +387,16 @@ export default function CommunityWriteForm({ formId, initialPost }: CommunityWri
                             </ul>
                         )}
 
-                        {placeOpen && <PlaceSearch value={place} onChange={setPlace} />}
+                        {placeOpen && <PlaceSearch value={place} onChange={setPlace} onRemove={removePlace} />}
 
                         {pollOpen && (
                             <fieldset disabled={isPollLocked}>
-                                <p className="text-sm font-bold">📊 투표</p>
+                                <div className="flex items-center justify-between gap-4">
+                                    <p className="text-sm font-bold">📊 투표</p>
+                                    {!isPollLocked && (
+                                        <button type="button" aria-label="투표 삭제" onClick={removePoll} className="shrink-0 text-sm font-bold text-primary hover:underline">삭제</button>
+                                    )}
+                                </div>
                                 {isPollLocked && <p className="mt-2 text-sm text-[#8A9A90]">참여한 사람이 있는 투표는 수정하거나 삭제할 수 없어요.</p>}
                                 <input value={pollQuestion} onChange={(event) => setPollQuestion(event.target.value)} placeholder="투표 제목을 입력해 주세요" aria-label="투표 제목" maxLength={MAX_POLL_QUESTION_LENGTH} className={`${inputClass} mt-3`} />
                                 <ul className="mt-3 space-y-2">

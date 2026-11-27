@@ -10,7 +10,7 @@ import {
     FEED_PAGE_SIZE,
     POPULAR_REFETCH_MS,
     SEARCH_DEBOUNCE_MS,
-    WRITE_POST_PATH,
+    getWritePostPath,
 } from "../_constants/feed";
 import useHydrated from "../_hooks/useHydrated";
 import CategoryList from "./CategoryList";
@@ -53,6 +53,7 @@ export default function CommunityLayout() {
         refetchInterval: POPULAR_REFETCH_MS,
     });
 
+    const writeHref = getWritePostPath(category);
     const items = posts.data?.items ?? [];
     // 카테고리·정렬·페이지·검색어가 바뀌면 이전 데이터를 보여 주지 않고 스켈레톤을 보여 줍니다.
     const loading = posts.isPending || posts.isPlaceholderData;
@@ -96,7 +97,7 @@ export default function CommunityLayout() {
     return (
         <div className="relative mt-[30px] pb-16">
             <div className="absolute -top-[26px] right-0">
-                <WritePostButton />
+                <WritePostButton href={writeHref} />
             </div>
 
             <div className="grid grid-cols-[294px_682px_288px] items-start gap-7">
@@ -128,7 +129,7 @@ export default function CommunityLayout() {
                             loading={loading}
                             error={posts.isError}
                             searchQuery={query}
-                            writeHref={WRITE_POST_PATH}
+                            writeHref={writeHref}
                             onRetry={() => posts.refetch()}
                             onClearSearch={handleClearSearch}
                         />

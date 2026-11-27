@@ -29,5 +29,9 @@ export const SCROLL_SETTLE_MS = 500;
 export const WRITE_POST_PATH = "/community/new";
 export const LOGIN_PATH = "/login";
 
+// 목록에서 고른 카테고리를 글쓰기 화면의 게시판 기본값으로 넘깁니다. "전체 피드"는 넘기지 않습니다.
+export const getWritePostPath = (category: FeedCategoryId) =>
+    category === "all" ? WRITE_POST_PATH : `${WRITE_POST_PATH}?category=${category}`;
+
 // 포커스 링을 지우지 않고 --brand-text 2px 링을 사용합니다.
 export const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-text";

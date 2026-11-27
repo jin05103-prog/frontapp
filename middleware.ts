@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
     if (!hasRefreshToken && requiresLogin) {
         // 로그인 후 원래 가려던 페이지로 돌아올 수 있도록 경로를 함께 넘깁니다.
         const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("redirect", pathname);
+        loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
         return NextResponse.redirect(loginUrl);
     }
     if (hasRefreshToken && pathname === "/login") {

@@ -11,6 +11,8 @@ import PostPlaceMap from "./PostPlaceMap";
 interface PlaceSearchProps {
     value: CommunityPostPlace | null;
     onChange: (place: CommunityPlace | null) => void;
+    // 장소 첨부 전체를 삭제합니다.
+    onRemove: () => void;
 }
 
 const toPlace = (result: KakaoPlaceResult): CommunityPlace => ({
@@ -21,7 +23,7 @@ const toPlace = (result: KakaoPlaceResult): CommunityPlace => ({
 });
 
 // 카카오 장소 키워드 검색으로 장소 하나를 고릅니다. 고르면 아래에 지도를 보여 줍니다.
-export default function PlaceSearch({ value, onChange }: PlaceSearchProps) {
+export default function PlaceSearch({ value, onChange, onRemove }: PlaceSearchProps) {
     const key = getKakaoMapKey();
     const { status, handleReady, handleError } = useKakaoSdk(!!key);
     const [keyword, setKeyword] = useState("");
@@ -67,7 +69,10 @@ export default function PlaceSearch({ value, onChange }: PlaceSearchProps) {
     return (
         <div>
             {key && <Script id={KAKAO_MAP_SCRIPT_ID} src={getKakaoMapSrc(key)} strategy="afterInteractive" onReady={handleReady} onError={handleError} />}
-            <p className="text-sm font-bold">📍 장소</p>
+            <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-bold">📍 장소</p>
+                <button type="button" aria-label="장소 삭제" onClick={onRemove} className="shrink-0 text-sm font-bold text-primary hover:underline">삭제</button>
+            </div>
             <div className="mt-3 flex gap-2">
                 <input
                     value={keyword}
