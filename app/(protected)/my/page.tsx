@@ -40,6 +40,7 @@ export default function MyPage() {
                 <Link href="/pregnancies/doctors" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">의료진 연결 관리 →</Link>
                 <Link href="/pregnancies/closure-requests" className="mt-5 ml-3 inline-flex rounded-xl border border-[#DFE9E5] px-5 py-3 text-sm font-semibold text-[#23443F]">임신 종료 요청 확인 →</Link>
                 <Link href="/pregnancies/sharing" className="mt-5 ml-3 inline-flex rounded-xl border border-[#DFE9E5] px-5 py-3 text-sm font-semibold text-[#23443F]">의료진 정보 공유 설정 →</Link>
+                <Link href="/pregnancies/record-access" className="mt-5 ml-3 inline-flex rounded-xl border border-[#DFE9E5] px-5 py-3 text-sm font-semibold text-[#23443F]">검진 기록 열람 승인 →</Link>
             </section>
             <div>
                 <button 
