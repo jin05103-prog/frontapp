@@ -5,6 +5,7 @@ import useAuthStore from "@/stores/useAuthStore";
 import { ApiResponseDTO } from "@/types/common/common.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 
 export default function MyPage() {
@@ -33,6 +34,14 @@ export default function MyPage() {
 
     return (
         <>
+            <section className="mt-10 rounded-2xl border border-[#DFE9E5] p-7 font-pretendard">
+                <h1 className="text-xl font-semibold text-[#23443F]">의료진 연결</h1>
+                <p className="mt-3 text-sm text-[#6D827D]">방문한 병원의 의료진에게 연결을 요청하고 처리 상태를 확인하세요.</p>
+                <Link href="/pregnancies/doctors" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">의료진 연결 관리 →</Link>
+                <Link href="/pregnancies/closure-requests" className="mt-5 ml-3 inline-flex rounded-xl border border-[#DFE9E5] px-5 py-3 text-sm font-semibold text-[#23443F]">임신 종료 요청 확인 →</Link>
+                <Link href="/pregnancies/sharing" className="mt-5 ml-3 inline-flex rounded-xl border border-[#DFE9E5] px-5 py-3 text-sm font-semibold text-[#23443F]">의료진 정보 공유 설정 →</Link>
+                <Link href="/pregnancies/record-access" className="mt-5 ml-3 inline-flex rounded-xl border border-[#DFE9E5] px-5 py-3 text-sm font-semibold text-[#23443F]">검진 기록 열람 승인 →</Link>
+            </section>
             <div>
                 <button 
                     onClick={handleLogout}
