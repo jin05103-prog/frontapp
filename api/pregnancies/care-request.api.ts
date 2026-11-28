@@ -63,6 +63,8 @@ async function request<T>(
   return body.data;
 }
 
+export { request as pregnancyRequest };
+
 export const getMaternalCareContextApi = (signal?: AbortSignal) =>
   request<MaternalCareContextDTO>("/care-context", "GET", undefined, signal);
 export const searchAvailableDoctorsApi = (
